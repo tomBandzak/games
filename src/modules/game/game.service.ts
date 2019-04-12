@@ -7,11 +7,15 @@ import {IGame} from './interfaces/game.interface';
 @Injectable()
 export class GameService {
 
+  static apiURI = 'http://www.cheapshark.com/api/1.0/deals';
+  static storeID = 1;
+  static searchPattern = encodeURI('grand theft auto');
+
   /**
    * Returns list of games
    */
   public async getGames(): Promise<IGame[]> {
-    const dealList = await this.fetchGameInfo();
+    const dealList = await this.fetchGameInfo(GameService.searchPattern);
     const games = dealList.map(async deal => {
       const detail = await this.fetchDealDetail(deal.dealID);
 
@@ -26,8 +30,8 @@ export class GameService {
     return await Promise.all(games);
   }
 
-  private async fetchGameInfo(): Promise<ICheapSharkResponse[]> {
-    const res = await Axios.get('http://www.cheapshark.com/api/1.0/deals?storeID=1&desc=0&title=grand%20theft%20auto&pageSize=20&sortBy=Price&desc=0');
+  private async fetchGameInfo(pattern: string): Promise<ICheapSharkResponse[]> {
+    const res = await Axios.get(`${GameService.apiURI}?storeID=${GameService.storeID}&desc=0&title=${pattern}&pageSize=20`);
     if (res.status === 200) {
       return res.data;
     }
